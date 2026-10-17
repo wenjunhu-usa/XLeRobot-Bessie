@@ -1,0 +1,64 @@
+<!doctype html><meta charset="utf-8"><title>keyboard controller test</title>
+<div class="cams"></div><pre id="result">RUNNING</pre>
+<script>
+document.hasFocus=()=>true;
+const calls=[];
+let rejectMoveOnce=true;
+window.fetch=async (url, options={}) => {
+  const body=options.body ? JSON.parse(options.body) : null;
+  calls.push({url,body});
+  if (url.endsWith('/move') && rejectMoveOnce) {
+    rejectMoveOnce=false;
+    return {ok:false,status:400,text:async()=> 'Arm has not caught up'};
+  }
+  return {ok:true,status:200,text:async()=>'',json:async()=>({token:'keyboard-token'})};
+};
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const check=(value,message)=>{if(!value)throw new Error(message)};
+</script>
+<script src="../cartesian_control.js"></script>
+<script>
+(async()=>{
+  try {
+    const enabled=document.getElementById('joint-keyboard-enabled');
+    const arm=document.getElementById('joint-arm');
+    arm.value='right'; arm.dispatchEvent(new Event('change'));
+    enabled.checked=true; enabled.dispatchEvent(new Event('change'));
+    await wait(30);
+    check(calls.some(c=>c.url==='/api/keyboard/session'),'independent keyboard session');
+    document.dispatchEvent(new KeyboardEvent('keydown',{key:'w'}));
+    await wait(650);
+    document.dispatchEvent(new KeyboardEvent('keyup',{key:'w'}));
+    check(document.getElementById('joint-keyboard-status').textContent.includes('等待按键'),'keyup clears stale waiting status');
+    const moves=calls.filter(c=>c.url==='/api/keyboard/move');
+    check(moves.length>=2,'400 is retried while key remains held');
+    check(moves.some(c=>c.body.steps.right_arm_shoulder_lift===-2),'right shoulder uses 2 degree step');
+    window.dispatchEvent(new Event('blur'));
+    check(enabled.checked,'blur pauses without disabling');
+    window.dispatchEvent(new Event('focus'));
+    document.dispatchEvent(new KeyboardEvent('keydown',{key:'h'}));
+    await wait(250);
+    document.dispatchEvent(new KeyboardEvent('keyup',{key:'h'}));
+    check(calls.some(c=>c.url==='/api/keyboard/move'&&c.body.steps.right_arm_gripper===2),'gripper uses 2 percent step after refocus');
+    check(!calls.some(c=>c.url.startsWith('/api/gamepad/')),'keyboard never uses gamepad session');
+    const expected={
+      q:['right_arm_shoulder_pan',-2],a:['right_arm_shoulder_pan',2],
+      w:['right_arm_shoulder_lift',-2],s:['right_arm_shoulder_lift',2],
+      e:['right_arm_elbow_flex',-2],d:['right_arm_elbow_flex',2],
+      r:['right_arm_wrist_flex',-2],f:['right_arm_wrist_flex',2],
+      t:['right_arm_wrist_roll',-2],g:['right_arm_wrist_roll',2],
+      y:['right_arm_gripper',-2],h:['right_arm_gripper',2]
+    };
+    rejectMoveOnce=false;
+    for(const [key,[joint,amount]] of Object.entries(expected)) {
+      const before=calls.length;
+      document.dispatchEvent(new KeyboardEvent('keydown',{key}));
+      await wait(220);
+      document.dispatchEvent(new KeyboardEvent('keyup',{key}));
+      const sent=calls.slice(before).find(c=>c.url==='/api/keyboard/move'&&c.body.steps[joint]===amount);
+      check(sent,`${key} maps to ${joint} ${amount}`);
+    }
+    result.textContent='PASS';
+  } catch(error) { result.textContent='FAIL: '+error.message; }
+})();
+</script>

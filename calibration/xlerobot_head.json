@@ -1,0 +1,16 @@
+{
+    "mount_pan": {
+        "id": 7,
+        "drive_mode": 0,
+        "homing_offset": -1262,
+        "range_min": 530,
+        "range_max": 3736
+    },
+    "mount_tilt": {
+        "id": 8,
+        "drive_mode": 0,
+        "homing_offset": 1916,
+        "range_min": 1944,
+        "range_max": 3273
+    }
+}

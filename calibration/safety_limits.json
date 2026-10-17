@@ -1,0 +1,147 @@
+{
+  "format": "xlerobot_safety_limits_v1",
+  "recorded_at": "2026-10-05T16:27:29.137737+00:00",
+  "method": "user-selected endpoints intersected with calibrated motor range, then inset",
+  "joints": {
+    "left_arm_shoulder_pan": {
+      "min": -76.7308,
+      "max": 56.0714,
+      "unit": "deg",
+      "recorded_min": -81.8901,
+      "recorded_max": 56.5714,
+      "hardware_min": -77.2308,
+      "hardware_max": 77.2308,
+      "inset": 0.5
+    },
+    "left_arm_shoulder_lift": {
+      "min": -102.4451,
+      "max": 101.0385,
+      "unit": "deg",
+      "recorded_min": -103.2088,
+      "recorded_max": 101.5385,
+      "hardware_min": -102.9451,
+      "hardware_max": 102.9451,
+      "inset": 0.5
+    },
+    "left_arm_elbow_flex": {
+      "min": -93.6099,
+      "max": 93.478,
+      "unit": "deg",
+      "recorded_min": -94.1099,
+      "recorded_max": 93.978,
+      "hardware_min": -95.6484,
+      "hardware_max": 95.6484,
+      "inset": 0.5
+    },
+    "left_arm_wrist_flex": {
+      "min": -89.0385,
+      "max": 89.0385,
+      "unit": "deg",
+      "recorded_min": -92.5275,
+      "recorded_max": 106.6813,
+      "hardware_min": -89.5385,
+      "hardware_max": 89.5385,
+      "inset": 0.5
+    },
+    "left_arm_wrist_roll": {
+      "min": -89.7418,
+      "max": 94.4011,
+      "unit": "deg",
+      "recorded_min": -90.2418,
+      "recorded_max": 94.9011,
+      "hardware_min": -180.0,
+      "hardware_max": 180.0,
+      "inset": 0.5
+    },
+    "left_arm_gripper": {
+      "min": 1.4047,
+      "max": 98.6649,
+      "unit": "%",
+      "recorded_min": 0.9047,
+      "recorded_max": 99.1649,
+      "hardware_min": 0.0,
+      "hardware_max": 100.0,
+      "inset": 0.5
+    },
+    "head_motor_1": {
+      "min": -100.4231,
+      "max": 89.0824,
+      "unit": "deg",
+      "recorded_min": -100.9231,
+      "recorded_max": 89.5824,
+      "hardware_min": -140.9231,
+      "hardware_max": 140.9231,
+      "inset": 0.5
+    },
+    "head_motor_2": {
+      "min": -52.9945,
+      "max": 29.0824,
+      "unit": "deg",
+      "recorded_min": -53.4945,
+      "recorded_max": 29.5824,
+      "hardware_min": -58.4176,
+      "hardware_max": 58.4176,
+      "inset": 0.5
+    },
+    "right_arm_shoulder_pan": {
+      "min": -74.6648,
+      "max": 74.489,
+      "unit": "deg",
+      "recorded_min": -92.1319,
+      "recorded_max": 74.989,
+      "hardware_min": -75.1648,
+      "hardware_max": 75.1648,
+      "inset": 0.5
+    },
+    "right_arm_shoulder_lift": {
+      "min": -102.4011,
+      "max": 102.2253,
+      "unit": "deg",
+      "recorded_min": -102.9011,
+      "recorded_max": 102.7253,
+      "hardware_min": -103.5165,
+      "hardware_max": 103.5165,
+      "inset": 0.5
+    },
+    "right_arm_elbow_flex": {
+      "min": -95.6758,
+      "max": 95.5,
+      "unit": "deg",
+      "recorded_min": -96.1758,
+      "recorded_max": 96.0,
+      "hardware_min": -96.1758,
+      "hardware_max": 96.1758,
+      "inset": 0.5
+    },
+    "right_arm_wrist_flex": {
+      "min": -97.9615,
+      "max": 99.2802,
+      "unit": "deg",
+      "recorded_min": -98.4615,
+      "recorded_max": 99.7802,
+      "hardware_min": -100.1319,
+      "hardware_max": 100.1319,
+      "inset": 0.5
+    },
+    "right_arm_wrist_roll": {
+      "min": -92.2033,
+      "max": 88.9066,
+      "unit": "deg",
+      "recorded_min": -92.7033,
+      "recorded_max": 89.4066,
+      "hardware_min": -180.0,
+      "hardware_max": 180.0,
+      "inset": 0.5
+    },
+    "right_arm_gripper": {
+      "min": 3.2967,
+      "max": 96.9761,
+      "unit": "%",
+      "recorded_min": 2.7967,
+      "recorded_max": 97.4761,
+      "hardware_min": 0.0,
+      "hardware_max": 100.0,
+      "inset": 0.5
+    }
+  }
+}

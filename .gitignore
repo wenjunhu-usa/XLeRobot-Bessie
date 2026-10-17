@@ -1,0 +1,31 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+*.log
+*.out
+*.err
+*.tmp
+*.swp
+*~
+.DS_Store
+.idea/
+.vscode/
+
+# Private machine configuration and generated recordings
+robot_ports.env
+collected_data/
+
+# Generated dataset exports
+*.parquet
+
+# Local TLS keys and credentials
+*.pem
+*.key
+.env
+.env.*
+!.env.example

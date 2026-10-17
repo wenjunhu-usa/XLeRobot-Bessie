@@ -1,0 +1,8 @@
+XLeRobot-Bessie contains Bessie-specific control and calibration work built on
+the XLeRobot and LeRobot projects. Their source code, hardware files, simulation
+assets, and documentation are not redistributed in this repository.
+
+XLeRobot: https://github.com/Vector-Wangel/XLeRobot
+LeRobot: https://github.com/huggingface/lerobot
+
+See LICENSE for the Apache License, Version 2.0.

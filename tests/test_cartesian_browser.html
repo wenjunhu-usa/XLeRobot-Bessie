@@ -1,0 +1,49 @@
+<div class="cams"></div><pre id="result">RUNNING</pre>
+<script>
+let timers=[], calls=[], nextFailure=0;
+window.setInterval=(fn,ms)=>{timers.push({fn,ms});return timers.length};
+window.fetch=async(path,options)=>{
+  const data=JSON.parse(options.body); calls.push({path,data});
+  if(nextFailure){const status=nextFailure;nextFailure=0;return {ok:false,status,text:async()=>'Arm has not caught up'}}
+  return {ok:true,status:200,text:async()=>'',json:async()=>({token:'keyboard-token'})};
+};
+document.hasFocus=()=>true;
+</script>
+<script src="../cartesian_control.js"></script>
+<script>
+(async()=>{try {
+  const check=(condition,message)=>{if(!condition)throw Error(message)};
+  const enabled=document.getElementById('cart-enabled');
+  enabled.checked=true;enabled.dispatchEvent(new Event('change'));await new Promise(resolve=>setTimeout(resolve,0));
+  check(calls[0].path==='/api/cartesian/session'&&calls[0].data.action==='start','session start');
+  document.dispatchEvent(new KeyboardEvent('keydown',{key:'w'}));
+  const controlTimer=timers.find(timer=>timer.ms===150);
+  await controlTimer.fn();
+  check(!calls.some(call=>call.path==='/api/cartesian/move'),'W without Shift must not move');
+  document.dispatchEvent(new KeyboardEvent('keyup',{key:'w'}));
+  document.dispatchEvent(new KeyboardEvent('keydown',{key:'Shift'}));
+  document.dispatchEvent(new KeyboardEvent('keydown',{key:'w'}));
+  await controlTimer.fn();
+  const move=calls.find(call=>call.path==='/api/cartesian/move');
+  check(move.data.commands.left.height===.003,'W raises selected arm by 3 mm');
+  document.dispatchEvent(new KeyboardEvent('keydown',{key:'s'}));
+  await controlTimer.fn();
+  check(calls.at(-1).data.commands.left.height===-.003,'S replaces W with negative height');
+  document.dispatchEvent(new KeyboardEvent('keyup',{key:'s'}));
+  document.dispatchEvent(new KeyboardEvent('keydown',{key:'a'}));
+  await controlTimer.fn();
+  check(calls.at(-1).data.commands.left.reach===-.003,'A retracts by 3 mm');
+  document.dispatchEvent(new KeyboardEvent('keyup',{key:'a'}));
+  document.dispatchEvent(new KeyboardEvent('keydown',{key:'w'}));
+  nextFailure=400;await controlTimer.fn();
+  check(enabled.checked,'temporary following rejection must keep keyboard enabled');
+  document.dispatchEvent(new KeyboardEvent('keyup',{key:'w'}));
+  document.dispatchEvent(new KeyboardEvent('keyup',{key:'Shift'}));
+  document.getElementById('cart-arm').value='right';
+  window.dispatchEvent(new CustomEvent('xlerobot-state',{detail:{cartesian:{right:{reach:.1,height:.2,pitch:3}}}}));
+  check(document.getElementById('cart-pose').textContent.includes('100 mm'),'pose display');
+  window.dispatchEvent(new Event('blur'));await new Promise(resolve=>setTimeout(resolve,0));
+  check(!enabled.checked&&calls.at(-1).data.action==='stop','focus loss stops session');
+  result.textContent='PASS: Shift deadman, keyboard session, 3 mm Cartesian move, pose display and focus-loss stop';
+}catch(error){result.textContent='FAIL: '+error.stack}})();
+</script>
