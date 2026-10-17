@@ -2,17 +2,17 @@
 (() => {
   const panel = document.createElement('div');
   panel.className = 'panel base';
-  panel.innerHTML = `<h2>双臂逐关节控制（键盘连续）</h2>
-    <label>手臂 <select id="joint-arm"><option value="left">左臂</option><option value="right">右臂</option></select></label>
-    <label><input id="joint-keyboard-enabled" type="checkbox">启用键盘逐关节控制</label>
-    <p id="joint-keyboard-status">停止</p>
+  panel.innerHTML = `<h2>Dual-arm joint control (continuous keyboard)</h2>
+    <label>Arm <select id="joint-arm"><option value="left">Left arm</option><option value="right">Right arm</option></select></label>
+    <label><input id="joint-keyboard-enabled" type="checkbox">Enable keyboard joint control</label>
+    <p id="joint-keyboard-status">Stopped</p>
     <table style="margin:auto;text-align:left;border-collapse:collapse"><tbody>
-      <tr><td>Q / A</td><td>肩部水平转：负 / 正</td><td>W / S</td><td>上臂肩关节：负 / 正</td></tr>
-      <tr><td>E / D</td><td>前臂肘关节：负 / 正</td><td>R / F</td><td>手腕俯仰：负 / 正</td></tr>
-      <tr><td>T / G</td><td>手腕旋转：负 / 正</td><td>Y / H</td><td>夹爪：闭合 / 张开</td></tr>
-      <tr><td>空格</td><td colspan="3">立即取消键盘控制</td></tr>
+      <tr><td>Q / A</td><td>Shoulder pan: negative / positive</td><td>W / S</td><td>Shoulder lift: negative / positive</td></tr>
+      <tr><td>E / D</td><td>Elbow: negative / positive</td><td>R / F</td><td>Wrist pitch: negative / positive</td></tr>
+      <tr><td>T / G</td><td>Wrist roll: negative / positive</td><td>Y / H</td><td>Gripper: close / open</td></tr>
+      <tr><td>Space</td><td colspan="3">Immediately disable keyboard control</td></tr>
     </tbody></table>
-    <p>先选择左臂或右臂。勾选启用后，直接持续按住动作键即可连续移动；松开立即停止新增目标。关节每周期 2°，夹爪每周期 2%。首次操作请用短按确认实机方向。</p>`;
+    <p>Select an arm, enable keyboard control, and hold an action key for continuous motion. Release it to stop adding targets. Joints move 2° per cycle and grippers 2% per cycle. Use short taps first to confirm physical direction.</p>`;
   document.querySelector('.cams').before(panel);
 
   const enabled = panel.querySelector('#joint-keyboard-enabled');
@@ -29,11 +29,11 @@
     y:['gripper',-2], h:['gripper',2]
   };
   const jointNames = {
-    shoulder_pan:'肩部水平转', shoulder_lift:'上臂肩关节', elbow_flex:'前臂肘关节',
-    wrist_flex:'手腕俯仰', wrist_roll:'手腕旋转', gripper:'夹爪'
+    shoulder_pan:'Shoulder pan', shoulder_lift:'Shoulder lift', elbow_flex:'Elbow',
+    wrist_flex:'Wrist pitch', wrist_roll:'Wrist roll', gripper:'Gripper'
   };
   const opposites = {q:'a',a:'q',w:'s',s:'w',e:'d',d:'e',r:'f',f:'r',t:'g',g:'t',y:'h',h:'y'};
-  const readyText = () => `已启用：${arm.options[arm.selectedIndex].text}，等待按键`;
+  const readyText = () => `Enabled: ${arm.options[arm.selectedIndex].text}; waiting for input`;
 
   async function request(path, data) {
     const response = await fetch('/api/keyboard/' + path, {
@@ -47,7 +47,7 @@
     }
     return response.json();
   }
-  function stop(message='停止') {
+  function stop(message='Stopped') {
     const oldToken = token;
     token = null; held.clear(); enabled.checked = false; revision++;
     status.textContent = message;
@@ -67,18 +67,18 @@
         token = result.token;
         status.textContent = readyText();
       }
-    } catch (error) { stop('启用失败：' + error.message); }
+    } catch (error) { stop('Enable failed: ' + error.message); }
   });
   arm.addEventListener('change', () => {
     held.clear();
     if (enabled.checked) status.textContent = readyText();
   });
-  window.addEventListener('blur', () => pause('窗口失去焦点，已暂停；返回后直接按键继续'));
+  window.addEventListener('blur', () => pause('Window lost focus; paused. Press a key after returning to continue.'));
   window.addEventListener('focus', () => {
     if (enabled.checked && token) status.textContent = readyText();
   });
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) pause('页面不可见，已暂停；返回后直接按键继续');
+    if (document.hidden) pause('Page hidden; paused. Press a key after returning to continue.');
   });
   document.addEventListener('keydown', event => {
     if (event.code === 'Space' && enabled.checked) { event.preventDefault(); stop(); return; }
@@ -107,15 +107,15 @@
           const [joint,amount]=keyMap[key];
           return `${key.toUpperCase()} ${jointNames[joint]} ${amount>0?'+':'−'}2${joint==='gripper'?'%':'°'}`;
         });
-        status.textContent = `移动中：${arm.options[arm.selectedIndex].text}；${actions.join('，')}；松开即停止`;
+        status.textContent = `Moving: ${arm.options[arm.selectedIndex].text}; ${actions.join(', ')}; release to stop`;
       }
     } catch (error) {
       if (rev === revision && (error.status === 400 || error.status === 429)) {
         status.textContent = error.status === 400
-          ? '机械臂正在跟随目标，自动等待后继续'
-          : '连续控制中：等待下一控制周期';
+          ? 'Arm is following the target; waiting automatically'
+          : 'Continuous control: waiting for the next cycle';
       } else if (rev === revision) {
-        stop('已停止：' + error.message);
+        stop('Stopped: ' + error.message);
       }
     } finally { busy = false; }
   }

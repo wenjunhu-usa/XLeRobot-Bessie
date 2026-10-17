@@ -2,24 +2,24 @@
 // Non-standard pads must be calibrated with actual inputs before motion is allowed.
 window.createPadMapping = function(panel, stop) {
   const box = document.createElement('div');
-  box.innerHTML = '<button type="button" id="pad-calibrate">校准非标准手柄</button><button type="button" id="pad-calibrate-directions">校准方向键</button><p id="pad-calibration-status"></p><label>手臂纵向关节 <select id="pad-joint-select"><option value="0">肩部抬升</option><option value="1">肘部</option><option value="2">手腕俯仰</option><option value="3">手腕旋转</option><option value="4">夹爪</option></select></label><p>V2 校准会记录 A/B/X/Y、L/R、−/+ 和双摇杆。旧校准需重新执行一次。校准过程中不允许机器人动作。</p>';
+  box.innerHTML = '<button type="button" id="pad-calibrate">Calibrate non-standard gamepad</button><button type="button" id="pad-calibrate-directions">Calibrate D-pad</button><p id="pad-calibration-status"></p><label>Arm vertical joint <select id="pad-joint-select"><option value="0">Shoulder lift</option><option value="1">Elbow</option><option value="2">Wrist pitch</option><option value="3">Wrist roll</option><option value="4">Gripper</option></select></label><p>V2 calibration records A/B/X/Y, L/R, −/+, and both sticks. Run calibration again for old profiles. Robot motion is disabled during calibration.</p>';
   panel.append(box);
   const button = box.querySelector('button'), message = box.querySelector('p');
   const directionButton = box.querySelector('#pad-calibrate-directions');
-  const directionStages = [['按十字方向键 ↑', 'direction', 12], ['按十字方向键 ↓', 'direction', 13], ['按十字方向键 ←', 'direction', 14], ['按十字方向键 →', 'direction', 15]];
+  const directionStages = [['Press D-pad ↑', 'direction', 12], ['Press D-pad ↓', 'direction', 13], ['Press D-pad ←', 'direction', 14], ['Press D-pad →', 'direction', 15]];
   const stages = [
-    ['按住 A', 'button', 0],
-    ['按住 B', 'button', 1],
-    ['按住 X', 'button', 2],
-    ['按住 Y', 'button', 3],
-    ['按住左肩键 L（不是 ZL 扳机）', 'button', 4],
-    ['按住右肩键 R（不是 ZR 扳机）', 'button', 5],
-    ['按住 − / Back', 'button', 8],
-    ['按住 + / Start', 'button', 9],
-    ['只把左摇杆推向右', 'axis', 0, 1],
-    ['只把左摇杆推向上', 'axis', 1, -1],
-    ['只把右摇杆推向右', 'axis', 2, 1],
-    ['只把右摇杆推向上', 'axis', 3, -1]
+    ['Hold A', 'button', 0],
+    ['Hold B', 'button', 1],
+    ['Hold X', 'button', 2],
+    ['Hold Y', 'button', 3],
+    ['Hold left shoulder button L (not trigger ZL)', 'button', 4],
+    ['Hold right shoulder button R (not trigger ZR)', 'button', 5],
+    ['Hold − / Back', 'button', 8],
+    ['Hold + / Start', 'button', 9],
+    ['Move only the left stick right', 'axis', 0, 1],
+    ['Move only the left stick up', 'axis', 1, -1],
+    ['Move only the right stick right', 'axis', 2, 1],
+    ['Move only the right stick up', 'axis', 3, -1]
   ];
   let calibration = null, saved = {}, current = null, releaseCenters = null;
   try { saved = JSON.parse(localStorage.getItem('xlerobot-pad-mappings') || '{}'); } catch (_) {}
@@ -30,19 +30,19 @@ window.createPadMapping = function(panel, stop) {
   }
   button.onclick = () => {
     stop();
-    if (calibration) { calibration = null; message.textContent = '校准已取消'; button.textContent = '校准非标准手柄'; return; }
-    if (!current) { message.textContent = '先按手柄普通按钮，让浏览器识别设备'; return; }
+    if (calibration) { calibration = null; message.textContent = 'Calibration cancelled'; button.textContent = 'Calibrate non-standard gamepad'; return; }
+    if (!current) { message.textContent = 'Press a regular gamepad button so the browser detects it'; return; }
     calibration = {id:current.id, stage:0, released:false, centers:current.axes.slice(), buttons:{}, axes:{}, axisCount:current.axes.length, buttonCount:current.buttons.length, directions:{}, stages};
-    button.textContent = '取消校准';
-    message.textContent = '松开所有按钮，让两个摇杆回中，然后按提示操作';
+    button.textContent = 'Cancel calibration';
+    message.textContent = 'Release all buttons, center both sticks, then follow the prompts';
   };
   directionButton.onclick = () => {
     stop();
-    if (!current || !valid(saved[current.id], current)) { message.textContent = '请先完成非标准手柄的按键和摇杆校准，再校准方向键'; return; }
+    if (!current || !valid(saved[current.id], current)) { message.textContent = 'Complete non-standard button and stick calibration before calibrating the D-pad'; return; }
     const map = saved[current.id];
     calibration = {...map, id:current.id, stage:0, released:false, centers:current.axes.slice(), directions:{}, stages:directionStages};
-    button.textContent = '取消校准';
-    message.textContent = '先松开十字方向键，再按提示分别按上、下、左、右';
+    button.textContent = 'Cancel calibration';
+    message.textContent = 'Release the D-pad, then press up, down, left, and right as prompted';
   };
   function sample(pad) {
     current = pad;
@@ -50,7 +50,7 @@ window.createPadMapping = function(panel, stop) {
       if (releaseCenters && pad && !pad.buttons.some(b=>b.pressed) && pad.axes.every((v,i)=>Math.abs(v-releaseCenters[i])<.35)) releaseCenters = null;
       return;
     }
-    if (!pad || pad.id !== calibration.id) { calibration = null; button.textContent = '校准非标准手柄'; message.textContent = '手柄断连，校准已取消'; return; }
+    if (!pad || pad.id !== calibration.id) { calibration = null; button.textContent = 'Calibrate non-standard gamepad'; message.textContent = 'Gamepad disconnected; calibration cancelled'; return; }
     const c = calibration;
     const stages = c.stages;
     const held = pad.buttons.map((b,i)=>b.pressed ? i : -1).filter(i=>i>=0);
@@ -58,8 +58,8 @@ window.createPadMapping = function(panel, stop) {
     const offCenter = deviations.filter(a=>Math.abs(a.delta)>=.35);
     const neutral = !held.length && !offCenter.length;
     if (!c.released) {
-      if (neutral) { c.released = true; message.textContent = `步骤 ${c.stage+1}/${stages.length}：${stages[c.stage][0]}`; }
-      else message.textContent = `步骤 ${c.stage+1}/${stages.length}：先松开按钮并回中。${held.length ? '仍按下按钮 '+held.join(', ') : ''} ${offCenter.length ? '未回中的轴 '+offCenter.map(a=>`${a.index} (${a.delta.toFixed(2)})`).join(', ') : ''}`;
+      if (neutral) { c.released = true; message.textContent = `Step ${c.stage+1}/${stages.length}: ${stages[c.stage][0]}`; }
+      else message.textContent = `Step ${c.stage+1}/${stages.length}—release buttons and center sticks first. ${held.length ? 'Buttons still held: '+held.join(', ') : ''} ${offCenter.length ? 'Off-center axes: '+offCenter.map(a=>`${a.index} (${a.delta.toFixed(2)})`).join(', ') : ''}`;
       return;
     }
     const [label, kind, output, sign] = stages[c.stage];
@@ -70,18 +70,18 @@ window.createPadMapping = function(panel, stop) {
         c.directions[output] = {button:inputs[0]};
       } else if (!inputs.length && changes.length === 1) {
         c.directions[output] = {axis:changes[0].index, center:c.centers[changes[0].index], sign:Math.sign(changes[0].delta)};
-      } else { message.textContent = `步骤 ${c.stage+1}/${stages.length}：${label}，只按一个方向并保持约半秒`; return; }
+      } else { message.textContent = `Step ${c.stage+1}/${stages.length}: ${label}—hold only one direction for about half a second`; return; }
     } else if (kind === 'button') {
       const inputs = pad.buttons.map((b,i)=>b.pressed?i:-1).filter(i=>i>=0);
-      if (inputs.length !== 1) { message.textContent = `步骤 ${c.stage+1}/${stages.length}：${label}；${inputs.length ? '检测到多个按钮 '+inputs.join(', ')+'，请只按一个' : '尚未检测到按键，请按住约半秒'}；原始轴：${pad.axes.map(v=>v.toFixed(2)).join(', ')}`; return; }
-      if (Object.values(c.buttons).includes(inputs[0])) { message.textContent = '此按钮已分配，请松开后按正确按钮：'+label; return; }
+      if (inputs.length !== 1) { message.textContent = `Step ${c.stage+1}/${stages.length}: ${label}; ${inputs.length ? 'multiple buttons detected: '+inputs.join(', ')+'. Press only one' : 'no button detected; hold it for about half a second'}; raw axes: ${pad.axes.map(v=>v.toFixed(2)).join(', ')}`; return; }
+      if (Object.values(c.buttons).includes(inputs[0])) { message.textContent = 'This button is already assigned. Release it and press the requested button: '+label; return; }
       c.buttons[output] = inputs[0];
     } else {
       const inputs = deviations.filter(a=>Math.abs(a.delta)>.45).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
       if (!inputs.length || (inputs[1] && Math.abs(inputs[0].delta)-Math.abs(inputs[1].delta)<.25)) {
-        message.textContent = `步骤 ${c.stage+1}/${stages.length}：${label}，推过一半并保持约半秒；${inputs.length ? '两条轴变化接近，请沿提示方向直推' : '摇杆幅度不足'}。实际轴变化：${deviations.map(a=>`${a.index}: ${a.delta.toFixed(2)}`).join(' | ')}`; return;
+        message.textContent = `Step ${c.stage+1}/${stages.length}: ${label}—move beyond halfway and hold for about half a second; ${inputs.length ? 'two axes changed similarly; move straight in the requested direction' : 'stick movement is too small'}. Actual axis changes: ${deviations.map(a=>`${a.index}: ${a.delta.toFixed(2)}`).join(' | ')}`; return;
       }
-      if (Object.values(c.axes).some(a=>a.index===inputs[0].index)) { message.textContent = '此轴已分配，请松开后移动正确摇杆：'+label; return; }
+      if (Object.values(c.axes).some(a=>a.index===inputs[0].index)) { message.textContent = 'This axis is already assigned. Release it and move the requested stick: '+label; return; }
       c.axes[output] = {index:inputs[0].index, center:c.centers[inputs[0].index], sign:Math.sign(inputs[0].delta)*sign};
     }
     c.stage++; c.released = false;
@@ -89,9 +89,9 @@ window.createPadMapping = function(panel, stop) {
       saved[pad.id] = {buttons:c.buttons,axes:c.axes,directions:c.directions,axisCount:c.axisCount,buttonCount:c.buttonCount};
       try { localStorage.setItem('xlerobot-pad-mappings',JSON.stringify(saved)); } catch (_) {}
       releaseCenters = c.centers;
-      calibration = null; button.textContent = '重新校准手柄';
-      message.textContent = stages === directionStages ? '方向键校准完成：↑↓ 切换关节，←→ 切换模式。' : '校准完成。可继续点击“校准方向键”，或用网页选择模式和关节。';
-    } else message.textContent = `已记录步骤 ${c.stage}/${stages.length}。下一步：${stages[c.stage][0]}；请先松开按钮并让摇杆回中`;
+      calibration = null; button.textContent = 'Recalibrate gamepad';
+      message.textContent = stages === directionStages ? 'D-pad calibration complete: ↑↓ changes joints and ←→ changes modes.' : 'Calibration complete. You can calibrate the D-pad or select modes and joints on the page.';
+    } else message.textContent = `Recorded step ${c.stage}/${stages.length}. Next: ${stages[c.stage][0]}; release buttons and center the sticks first`;
   }
   return {
     sample,

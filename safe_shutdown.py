@@ -136,7 +136,7 @@ try:
     print(f"Wheel stop verified: goal={wheel_goal}, median velocity={wheel_velocity}")
     print("All 16 motor torques are off and verified.")
     print("12V POWER-OFF CHECK: PASS")
-    print("确认结果：现在可以安全断开 12V，建议断开 12V 电源。")
+    print("Verification complete: it is now safe to disconnect the 12 V supply. Disconnecting 12 V is recommended.")
 except Exception:
     try:
         if not all_torques_off:

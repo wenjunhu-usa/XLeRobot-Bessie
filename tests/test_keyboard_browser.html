@@ -29,7 +29,7 @@ const check=(value,message)=>{if(!value)throw new Error(message)};
     document.dispatchEvent(new KeyboardEvent('keydown',{key:'w'}));
     await wait(650);
     document.dispatchEvent(new KeyboardEvent('keyup',{key:'w'}));
-    check(document.getElementById('joint-keyboard-status').textContent.includes('等待按键'),'keyup clears stale waiting status');
+    check(document.getElementById('joint-keyboard-status').textContent.includes('waiting for input'),'keyup clears stale waiting status');
     const moves=calls.filter(c=>c.url==='/api/keyboard/move');
     check(moves.length>=2,'400 is retried while key remains held');
     check(moves.some(c=>c.body.steps.right_arm_shoulder_lift===-2),'right shoulder uses 2 degree step');

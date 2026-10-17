@@ -9,13 +9,13 @@ const check=(v,m)=>{if(!v)throw Error(m)};
 const enable=document.getElementById('arm-pad-enabled'), mode=document.getElementById('pad-mode');
 const arm=async()=>{pad.axes.fill(0);pad.buttons.forEach(b=>b.pressed=false);enable.checked=true;enable.dispatchEvent(new Event('change'));await tick()};
 const move=()=>calls.filter(c=>c.path.endsWith('/move')).at(-1)?.data;
-await tick();check(calls.length===0,'disabled');check(document.getElementById('pad-guide').textContent.includes('左臂肩部旋转'),'arm guide');await arm();
+await tick();check(calls.length===0,'disabled');check(document.getElementById('pad-guide').textContent.includes('Left arm shoulder pan'),'arm guide');await arm();
 pad.buttons[4].pressed=true;pad.buttons[5].pressed=true;pad.axes=[1,-1,-1,1];await tick();check(Object.keys(move().steps).length===4,'dual arms');
-pad.buttons[15].pressed=true;await tick();check(mode.value==='cartesian'&&!enable.checked,'mode switch disarms');check(document.getElementById('pad-guide').textContent.includes('末端收回 / 伸出'),'Cartesian guide');
+pad.buttons[15].pressed=true;await tick();check(mode.value==='cartesian'&&!enable.checked,'mode switch disarms');check(document.getElementById('pad-guide').textContent.includes('tool retract / extend'),'Cartesian guide');
 await arm();pad.buttons[4].pressed=true;pad.buttons[0].pressed=true;pad.axes=[1,-1,0,0];await tick();check(move().cartesian.left.reach===.003&&move().cartesian.left.height===.003&&move().cartesian.left.gripper===-2,'Cartesian mapping');
 pad.buttons.forEach(b=>b.pressed=false);pad.axes.fill(0);await tick();pad.buttons[15].pressed=true;await tick();check(mode.value==='head','second mode switch');
 await arm();pad.buttons[4].pressed=true;pad.axes=[1,-1,0,0];await tick();check(move().steps.head_motor_1===.4&&move().steps.head_motor_2===.4,'head mapping');
-mode.value='wheels';mode.dispatchEvent(new Event('change'));await arm();check(!enable.checked,'raised interlock');check(document.getElementById('pad-guide').textContent.includes('前进 / 后退'),'wheel guide');
+mode.value='wheels';mode.dispatchEvent(new Event('change'));await arm();check(!enable.checked,'raised interlock');check(document.getElementById('pad-guide').textContent.includes('Forward / reverse'),'wheel guide');
 document.getElementById('raised').checked=true;await arm();pad.buttons[4].pressed=true;pad.axes=[.5,-1,0,0];await tick();check(move().forward===1&&move().turn===.5,'wheel mapping');
 pad.buttons[4].pressed=false;await tick();check(move().forward===0&&move().turn===0,'release stops wheels');
 window.dispatchEvent(new Event('blur'));check(!enable.checked,'blur disarms');await new Promise(r=>setTimeout(r,0));check(calls.at(-1).path.endsWith('/stop'),'blur sends stop');
@@ -28,7 +28,7 @@ for (const input of [{b:0},{b:1},{b:2},{b:3},{b:4},{b:5},{b:6},{b:7},{a:0,v:1},{
  if(input.b!==undefined)pad.buttons[input.b].pressed=true;else {pad.axes[input.a]=input.v*.8;pad.axes[input.a^1]=.5;}
  await tick();
 }
-check(document.getElementById('pad-calibration-status').textContent.includes('校准完成'),'raw calibration completes');
+check(document.getElementById('pad-calibration-status').textContent.includes('Calibration complete'),'raw calibration completes');
 mode.value='arms';mode.dispatchEvent(new Event('change'));await arm();check(enable.checked,'raw enable');pad.buttons[4].pressed=true;pad.axes[0]=1;await tick();check(move().steps.left_arm_shoulder_pan===.4,'calibrated shoulder and axis');
 check(document.getElementById('pad-error').textContent==='','enable error clears');
 pad.axes.fill(0);pad.buttons.forEach(b=>b.pressed=false);await tick();document.getElementById('pad-calibrate-directions').click();
